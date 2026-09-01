@@ -147,6 +147,17 @@ Para anexar as evidencias a entrega, compacte as pastas `playwright-report/` e
 `test-results/` produzidas pela execucao mais recente. Videos e traces permitem
 reproduzir visualmente falhas sem uma nova execucao.
 
+## CI/CD
+
+O projeto possui integracao continua configurada com **GitHub Actions** em
+`.github/workflows/playwright.yml`. O workflow e executado automaticamente em
+cada `push` ou `pull request` direcionado para a branch `main`.
+
+O pipeline utiliza Node.js 20, instala as dependencias com `npm ci`, instala os
+navegadores do Playwright e executa `npm test`. O relatorio HTML e publicado
+como o artefato `playwright-report`, inclusive quando houver falha, e fica
+disponivel por 14 dias na execucao do GitHub Actions.
+
 ## Entrega do codigo-fonte
 
 Envie o link de um repositorio publico no GitHub ou GitLab contendo esta pasta,
