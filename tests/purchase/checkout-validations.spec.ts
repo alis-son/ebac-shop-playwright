@@ -116,6 +116,7 @@ test('CT07 - Checkout: validar campos obrigatórios', async ({ page, context }) 
   const success = await checkoutPage.attemptPlaceOrder();
 
   if (!success) {
+    await expect(checkoutPage.requiredFieldErrors).toBeVisible({ timeout: 15000 });
     const errors = await checkoutPage.getErrorMessages();
     
     console.log('❌ Validação de campos obrigatórios acionada:\n');
