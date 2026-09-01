@@ -100,7 +100,7 @@ export class CheckoutPage {
   }
 
   get termsCheckbox(): Locator {
-    return this.page.locator('#terms, input[name="terms"]').first();
+    return this.page.locator('input[name="terms"]:not([disabled])').last();
   }
 
   // =============== MÉTODOS DE NAVEGAÇÃO ===============
@@ -262,29 +262,33 @@ export class CheckoutPage {
       throw new Error('Checkbox de aceite dos termos não encontrado no checkout');
     }
 
-    if (!(await this.termsCheckbox.isChecked())) {
-      try {
-        await this.termsCheckbox.check({ force: true });
-      } catch {
-        await this.termsCheckbox.evaluate((element) => {
-          const checkbox = element as HTMLInputElement;
-          checkbox.checked = true;
+    const accepted = await this.page.locator('input[name="terms"]:not([disabled])').evaluateAll((elements) => {
+      const checkboxes = elements as HTMLInputElement[];
+
+      for (const checkbox of checkboxes) {
+        if (!checkbox.checked) {
+          checkbox.closest('label')?.click();
+        }
+
+        if (!checkbox.checked) {
+          checkbox.click();
+        }
+
+        if (!checkbox.checked) {
+          const checkedSetter = Object.getOwnPropertyDescriptor(
+            HTMLInputElement.prototype,
+            'checked'
+          )?.set;
+          checkedSetter?.call(checkbox, true);
           checkbox.dispatchEvent(new Event('input', { bubbles: true }));
           checkbox.dispatchEvent(new Event('change', { bubbles: true }));
-        });
+        }
       }
-    }
 
-    if (!(await this.termsCheckbox.isChecked())) {
-      await this.page.locator('label[for="terms"]').click({ force: true });
-    }
+      return checkboxes.some((checkbox) => checkbox.checked);
+    });
 
-    await this.page.waitForFunction(
-      () => (document.querySelector('#terms, input[name="terms"]') as HTMLInputElement | null)?.checked === true,
-      { timeout: 5000 }
-    );
-
-    if (!(await this.termsCheckbox.isChecked())) {
+    if (!accepted || !(await this.termsCheckbox.isChecked())) {
       throw new Error('Não foi possível marcar o aceite dos termos');
     }
   }

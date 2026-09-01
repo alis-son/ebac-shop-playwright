@@ -22,7 +22,7 @@ test('exemplo prático - validação matemática com dados reais', async ({ page
   const productPage = new ProductPage(page);
   const priceText = await productPage.price.textContent();
   const unitPrice = MoneyUtils.parseMoneyBR(priceText);
-  await productPage.addToCart();
+  expect(await productPage.addToCartWithFormFallback()).toBe(true);
 
   // Ir para carrinho
   const cartPage = new CartPage(page);
